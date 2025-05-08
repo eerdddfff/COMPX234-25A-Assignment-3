@@ -25,3 +25,33 @@ class TupleSpace:
             if key in self.space:
                 return f"OK ({key}, {self.space[key]}) read"
             return f"ERR {key} does not exist"
+
+def handle_client(conn, addr, tuplespace):
+    print(f"[+] Connected by {addr}")
+    try:
+        while True:
+            data = conn.recv(1024).decode()
+            if not data:
+                break
+            parts = data.strip().split(' ', 2)
+            if len(parts) < 2:
+                conn.send("ERR invalid request".encode())
+                continue
+
+            command = parts[1]
+            key_value = parts[2] if len(parts) > 2 else ""
+            if command == 'P' and ' ' in key_value:
+                key, value = key_value.split(' ', 1)
+                response = tuplespace.put(key, value)
+            elif command == 'G':
+                response = tuplespace.get(key_value)
+            elif command == 'R':
+                response = tuplespace.read(key_value)
+            else:
+                response = "ERR unknown command"
+
+            total_len = len(response) + 4
+            conn.send(f"{str(total_len).zfill(3)} {response}".encode())
+    finally:
+        print(f"[-] Disconnected {addr}")
+        conn.close()
