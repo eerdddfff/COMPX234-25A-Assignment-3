@@ -1,0 +1,18 @@
+import socket
+import sys
+
+def send(sock, command):
+    cmd = command.strip()
+    parts = cmd.split(' ', 2)
+    if parts[0] not in ["PUT", "GET", "READ"]:
+        print(f"{cmd}: ERR invalid command")
+        return
+    action = {"PUT": "P", "GET": "G", "READ": "R"}[parts[0]]
+    key = parts[1]
+    value = parts[2] if len(parts) == 3 else ""
+    payload = f"{action} {key}" + (f" {value}" if value else "")
+    length = len(payload) + 4
+    message = f"{str(length).zfill(3)} {payload}"
+    sock.send(message.encode())
+    reply = sock.recv(1024).decode()
+    print(f"{cmd}: {reply[4:]}")
