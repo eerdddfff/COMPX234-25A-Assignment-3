@@ -55,3 +55,20 @@ def handle_client(conn, addr, tuplespace):
     finally:
         print(f"[-] Disconnected {addr}")
         conn.close()
+
+def start_server(port):
+    ts = TupleSpace()
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(('', port))
+        s.listen()
+        print(f"Server v2 listening on port {port}")
+        while True:
+            conn, addr = s.accept()
+            threading.Thread(target=handle_client, args=(conn, addr, ts)).start()
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: python tuple_server_v2.py <port>")
+        exit(1)
+    start_server(int(sys.argv[1]))
