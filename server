@@ -1,2 +1,7 @@
 import socket
 import threading
+
+class TupleSpace:
+    def __init__(self):
+        self.space = {}
+        self.lock = threading.Lock()
