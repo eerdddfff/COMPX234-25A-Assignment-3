@@ -5,3 +5,10 @@ class TupleSpace:
     def __init__(self):
         self.space = {}
         self.lock = threading.Lock()
+
+    def put(self, key, value):
+        with self.lock:
+            if key in self.space:
+                return f"ERR {key} already exists"
+            self.space[key] = value
+            return f"OK ({key}, {value}) added"
